@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gitlabhelper.mapper.ProjectMapper">
+    <!--定義
+    entity class-->
+    <resultMap id="BaseResultMap" type="com.example.gitlabhelper.entity.Project">
+        <!-- column: 欄位名, property: java property-->
+        <id column="project_id" jdbcType="INTEGER" property="id" />
+        <result column="fullname" jdbcType="VARCHAR" property="fullname" />
+        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+        <result column="project_name" jdbcType="VARCHAR" property="projectName" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+        <result column="create_datetime" jdbcType="VARCHAR" property="createDatetime" />
+    </resultMap>
+
+    <resultMap id="GroupNameMapper" type="com.example.gitlabhelper.entity.GroupNameAndCount">
+        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+        <result column="number" jdbcType="VARCHAR" property="number" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap"> 
+        select project_id, fullname, description, url,create_datetime 
+        from Project 
+    </select>
+
+    <select id="selectGroupNamesAndProjectCounts" resultMap="GroupNameMapper">
+    SELECT
+	    group_name,
+        count(group_name) AS number
+    FROM
+        Project
+    GROUP BY
+        group_name
+    </select>
+
+    <select id="selectByGroupNames" resultMap="BaseResultMap">
+        SELECT project_id,fullname,group_name,project_name,description,url,create_datetime
+        FROM Project
+        WHERE group_name IN (
+            <foreach collection="groupNames" index="" item="groupName" separator=",">  
+            #{groupName, jdbcType=VARCHAR}
+            </foreach>
+        )
+    </select>
+
+    <select id="findByGroupNames" resultMap="BaseResultMap">
+        SELECT project_id,fullname,group_name,project_name,description,url,create_datetime
+        FROM Project
+        WHERE group_name LIKE 
+        <foreach collection="groupNames" index="" item="groupName" separator=" OR group_name LIKE ">  
+            CONCAT('%', #{groupName, jdbcType=VARCHAR}, '%')
+        </foreach>
+    </select>
+
+    <insert id="insertBatch">
+        insert into 
+            Project(project_id, fullname, group_name, project_name, description, url, create_datetime) 
+        VALUES 
+        <foreach collection="projects" index="" item="project" separator=",">  
+        (#{project.id,jdbcType=INTEGER}, #{project.fullname,jdbcType=VARCHAR}, #{project.groupName,jdbcType=VARCHAR}, #{project.projectName,jdbcType=VARCHAR}, #{project.description,jdbcType=VARCHAR}, #{project.url,jdbcType=VARCHAR}, #{project.createDatetime,jdbcType=VARCHAR}) 
+        </foreach>
+    </insert>
+
+    <insert id="insert">
+        insert into Project(project_id, fullname, group_name, project_name, description, url, create_datetime) values(#{id,jdbcType=INTEGER}, #{fullname,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, #{projectName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{createDatetime,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteAll"> delete from Project </delete>
+
+</mapper>

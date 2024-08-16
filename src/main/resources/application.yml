@@ -1,0 +1,38 @@
+# gitlab:
+#   api:
+#     url: https://XXX.XXX.XXX/api/v4
+
+spring:
+  application:
+    name: gitlabhelper # 網址開頭
+  datasource:
+    password: ''
+    driver-class-name: org.sqlite.JDBC
+    username: ''
+    url: jdbc:sqlite:sqlite/data.db
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/ # JSP前綴
+      suffix: .jsp # JSP後綴
+  output:
+    ansi:
+      enabled: always # 輸出顏色
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: basic
+
+mybatis:
+  mapper-locations: classpath:mappers/*Mapper.xml
+
+server:
+  servlet:
+    context-path: /gitlabhelper
+
+logging:
+  level:
+    com:
+      example:
+        gitlabhelper: debug
