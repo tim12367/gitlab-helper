@@ -20,8 +20,8 @@
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap"> 
-        select project_id, fullname, description, url,create_datetime 
-        from Project 
+        SELECT project_id, fullname, description, url, create_datetime 
+        FROM Project 
     </select>
 
     <select id="selectGroupNamesAndProjectCounts" resultMap="GroupNameMapper">
@@ -54,7 +54,7 @@
     </select>
 
     <insert id="insertBatch">
-        insert into 
+        INSERT OR REPLACE INTO 
             Project(project_id, fullname, group_name, project_name, description, url, create_datetime) 
         VALUES 
         <foreach collection="projects" index="" item="project" separator=",">  
@@ -63,9 +63,9 @@
     </insert>
 
     <insert id="insert">
-        insert into Project(project_id, fullname, group_name, project_name, description, url, create_datetime) values(#{id,jdbcType=INTEGER}, #{fullname,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, #{projectName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{createDatetime,jdbcType=VARCHAR})
+        INSERT INTO Project(project_id, fullname, group_name, project_name, description, url, create_datetime) VALUES (#{id,jdbcType=INTEGER}, #{fullname,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, #{projectName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{createDatetime,jdbcType=VARCHAR})
     </insert>
 
-    <delete id="deleteAll"> delete from Project </delete>
+    <delete id="deleteAll"> DELETE FROM Project </delete>
 
 </mapper>
