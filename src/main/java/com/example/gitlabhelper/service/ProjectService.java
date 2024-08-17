@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.example.gitlabhelper.entity.GroupNameAndCount;
@@ -26,12 +27,12 @@ public class ProjectService {
     @Autowired
     private ProjectMapper projectMapper;
 
-    // @Autowired
-    // private GitLabDataService gitLabDataService;
-
     @Autowired
     private GitLabApiService gitLabApiService;
 
+    @Autowired
+    private Environment environment;
+    
     public List<Project> getAllProjects(String privateToken) {
         List<Project> projects = this.selectAll();
 
@@ -142,25 +143,37 @@ public class ProjectService {
         return searchRsDtos;
     }
 
-    public List<ProjectInfoRsDto> getAllProjectsFromApi(String privateToken) {
+    // call gitlab api 取得專案
+	public List<ProjectInfoRsDto> getAllProjectsFromApi(String privateToken) {
 
-        List<ProjectInfoRsDto> result = new ArrayList<>();
-        int index = 1;
+		// 限制最大筆數 -1為無限制
+		Integer limit = environment.getProperty("api.allprojects.limit", Integer.class, -1);
 
-        while (true) { // 一次取100筆 一直取到沒有資料
-            List<ProjectInfoRsDto> apiResponse = this.getProjectsByPageAndPerPage(100, index, privateToken);
+		List<ProjectInfoRsDto> result = new ArrayList<>();
+		int index = 1;
 
-            // 如果沒有資料就跳出
-            if (apiResponse.isEmpty()) {
-                break;
-            }
+		while (true) { // 一次取100筆 一直取到沒有資料
+			
+			// 超過最大筆數就跳出 -1 不限制
+			if (limit != -1 && result.size() >= limit) {
+				break;
+			}
 
-            result.addAll(apiResponse);
-            index++;
-        }
+			// call api(一次幾個project, 第幾批資料)
+			List<ProjectInfoRsDto> apiResponse = this.getProjectsByPageAndPerPage(100, index, privateToken);
 
-        return result;
-    }
+			// 如果沒有資料就跳出
+			if (apiResponse.isEmpty()) {
+				break;
+			}
+
+			result.addAll(apiResponse);
+
+			index++;
+		}
+
+		return result;
+	}
 
     private List<ProjectInfoRsDto> getProjectsByPageAndPerPage(int perPage, int page, String privateToken) {
         ProjectInfoRqDto apiRequest = ProjectInfoRqDto.builder()
