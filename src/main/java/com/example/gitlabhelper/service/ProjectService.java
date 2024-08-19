@@ -107,8 +107,10 @@ public class ProjectService {
     }
 
     public List<SearchRsDto> searchProjects(String privateToken, String searchGroup, String keyword) {
-        List<Project> projects = this.selectByGroupNames(Arrays.asList(searchGroup));
+        List<Project> projects = this.findByGroupNames(Arrays.asList(searchGroup));
 
+        log.debug("搜尋專案數：" + projects.size());
+        
         if (projects.isEmpty()) {
             projects = this.getAllProjects(privateToken);
         }
