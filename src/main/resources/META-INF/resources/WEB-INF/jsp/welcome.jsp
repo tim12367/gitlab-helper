@@ -248,8 +248,9 @@
                             $("#projectResultTable").hide();
                             console.log(data); // debug
                             drawResultList(data);
-                            highlightSearchText();
                             $("#keywordResultTable").show();
+                            hljs.highlightAll(); // 觸發highlight.js 修改CODE顏色
+                            highlightSearchText();
                         },
                         error: function (xhr, status, error) {
                             var err = eval("(" + xhr.responseText + ")");
@@ -300,11 +301,16 @@
                             infoMessage = '<b style="color:red;">※ 超過搜尋上限，僅顯示部分資料</b><br>';
                         }
 
+                     	// 防止'<','>'被解析為TAG
+                        const originalData = searchResult.data;
+                    	let replaceData = originalData.replaceAll("<","&lt;");
+                    	replaceData = replaceData.replaceAll(">","&gt;");
+                        
                         $("#resultList").append(
                             `<tr><td>\${infoMessage}\${searchResult.full_project_name} </td>
                             <td class='search-result'> \${searchResult.file_name} </td>
                             <td> TODO: 連結按鈕 </td>
-                            <td><code class='search-result'> \${searchResult.data} </code></td> </tr>`)
+                            <td><pre><code> \${replaceData} </code></pre></td> </tr>`)
                     })
                 }
 
