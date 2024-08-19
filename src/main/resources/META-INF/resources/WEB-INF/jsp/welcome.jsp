@@ -92,7 +92,8 @@
                     <tr>
                         <th scope="col" class="col-2">群/專案</th>
                         <th scope="col" class="col-2">檔名</th>
-                        <th scope="col" class="col-8">結果</th>
+                        <th scope="col" class="col-1"></th>                        
+                        <th scope="col" class="col-7">結果</th>
                     </tr>
                 </thead>
                 <tbody id="resultList">
@@ -300,8 +301,9 @@
                         }
 
                         $("#resultList").append(
-                            `<tr><td>\${infoMessage}\${searchResult.full_project_name} </td>)
-                            <td class='search-result'> \${searchResult.file_name} </td>)
+                            `<tr><td>\${infoMessage}\${searchResult.full_project_name} </td>
+                            <td class='search-result'> \${searchResult.file_name} </td>
+                            <td> TODO: 連結按鈕 </td>
                             <td><code class='search-result'> \${searchResult.data} </code></td> </tr>`)
                     })
                 }
@@ -327,14 +329,19 @@
 
                 function highlightSearchText() {
                     const keyword = $('#keyword').val();
-                    const regex = new RegExp(keyword , 'i')
-                    $(`.search-result`).each((index, data)=>
-                        {data.innerHTML = 
-                            data.innerHTML.replace(
-                            regex,
-                            `<b style="background-color: rebeccapurple;">\${keyword}</b>`
-                        )}
-                    )
+                    const regex = new RegExp(keyword , 'ig')
+                    const replaceString = `<mark style="background-color: rebeccapurple;">\${keyword}</mark>`;
+                    $(`.search-result`).each((index, element) => {
+                    	const originalHTML = $(element).html();
+                    	
+                    	// 防止'<','>'被解析為TAG
+                    	let replaceResult = originalHTML.replaceAll("<","&lt;");
+                    	replaceResult = replaceResult.replaceAll(">","&gt;");
+                    	
+                    	// mark keyword
+                    	replaceResult = replaceResult.replace(regex,replaceString);
+                    	$(element).html(replaceResult);
+					});
                 }
                 
                 function countProjects() {
