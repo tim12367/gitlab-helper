@@ -50,10 +50,27 @@
                     </div>
                 </div>
                 <div class="row mb-3">
+					<div class="row">
+						<div class="col">
+							<label class="form-label" for="searchGroup">群組:</label>
+						</div>
+					</div>
+					<div class="col">
+                        <input list="groups" class="form-control" type="text" id="searchGroup" placeholder="請輸入想查詢的群組..." oninput="countProjects();" autocomplete="off">
+	                    <datalist id="groups"></datalist>
+                    </div>
                     <div class="col">
-                        <select class="form-select" id="searchGroup"></select>
+                        <select class="form-select" id="searchGroupSelector" onchange="doChangeGroupSelected();"></select>
                     </div>
                 </div>
+				<div class="row mb-3">
+					<div class="col-auto">
+						<div class="row">
+							<div class="col-auto ml-12px">專案數：</div>
+							<div id="projects_count" class="col"></div>
+						</div>
+					</div>
+				</div>
             </div>
             <!-- 查詢全部專案 -->
             <table id="projectResultTable" class="table custom-class" style="display: none;">
@@ -187,6 +204,8 @@
                         success: function (data) {
                             console.log(data); // debug
                             drawSearchGroupSelector(data);
+                            drawSearchGroupList(data);
+                            countProjects();
                         },
                         error: function (xhr, status, error) {
                             var err = eval("(" + xhr.responseText + ")");
@@ -245,16 +264,32 @@
 
                 }
 
+                function doChangeGroupSelected() {
+                	let selectedOption = $("#searchGroupSelector").val();
+                	$("#searchGroup").val(selectedOption);
+                	countProjects();
+                }
+                
                 function drawSearchGroupSelector(data) {
-                    $("#searchGroup").empty();
-                    $("#searchGroup").append(
+                    $("#searchGroupSelector").empty();
+                    $("#searchGroupSelector").append(
                         `<option value="">請選擇群組</option>`)
                     data.forEach(function (groupData) {
-                        $("#searchGroup").append(
+                        $("#searchGroupSelector").append(
                             `<option value="\${groupData.group_name}">\${groupData.group_name}\t專案筆數: \${groupData.number}</option>`)
                     })
                 }
 
+                function drawSearchGroupList(data) {
+                	$("#groups").empty();
+                    $("#groups").append(
+                        `<option value="">請選擇群組</option>`)
+                    data.forEach(function (groupData) {
+                        $("#groups").append(
+                            `<option value="\${groupData.group_name}" project_num="\${groupData.number}">\${groupData.group_name}\t專案筆數: \${groupData.number}</option>`)
+                    })
+                }
+                
                 function drawResultList(data) {
                     $("#resultList").empty();
                     
@@ -267,7 +302,7 @@
                         $("#resultList").append(
                             `<tr><td>\${infoMessage}\${searchResult.full_project_name} </td>)
                             <td class='search-result'> \${searchResult.file_name} </td>)
-                            <td class='search-result'> \${searchResult.data} </td> </tr>`)
+                            <td><code class='search-result'> \${searchResult.data} </code></td> </tr>`)
                     })
                 }
 
@@ -293,7 +328,7 @@
                 function highlightSearchText() {
                     const keyword = $('#keyword').val();
                     const regex = new RegExp(keyword , 'i')
-                    $(`td.search-result`).each((index, data)=>
+                    $(`.search-result`).each((index, data)=>
                         {data.innerHTML = 
                             data.innerHTML.replace(
                             regex,
@@ -301,5 +336,21 @@
                         )}
                     )
                 }
+                
+                function countProjects() {
+                	const findGroupString = $('#searchGroup').val();
+                	
+                	var totalProjects = 0;                	
+                	$('#groups').children().each((index, option) => {
+                		if ($(option).val().match($('#searchGroup').val())) {
+	                		let projectNum = Number(option.getAttribute("project_num"));
+	                		projectNum = isNaN(projectNum) ? 0 : projectNum;
+	                		totalProjects += projectNum;                			
+                		}
+                	});
+                	
+                	$('#projects_count').text(totalProjects);
+                }
+                
             </script>
             <%@include file="common/footer.jsp" %>
