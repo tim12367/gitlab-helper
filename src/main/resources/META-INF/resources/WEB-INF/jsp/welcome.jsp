@@ -72,7 +72,7 @@
 					</div>
 				</div>
             </div>
-            <!-- 查詢全部專案 -->
+            <!-- 查詢全部專案顯示區塊 -->
             <table id="projectResultTable" class="table custom-class" style="display: none;">
                 <thead>
                     <tr>
@@ -86,7 +86,7 @@
                 <tbody id="projectList">
                 </tbody>
             </table>
-            <!-- 查詢關鍵字 -->
+            <!-- 查詢關鍵字顯示區塊 -->
             <table id="keywordResultTable" class="table custom-class" style="display: none;">
                 <thead>
                     <tr>
@@ -100,14 +100,17 @@
                 </tbody>
             </table>
             <script>
-
+				
+            	// 準備好時呼叫初始func
                 $(document).ready(function () {
                     init();
                 });
 
+            	// 初始func
                 function init() {
                     // 將localStorage的token填入input
                     $("#token").val(localStorage.getItem("token"));
+                    // 初始化群組清單
                     initSearchGroupSelector();
                 }
 
@@ -196,6 +199,7 @@
 
                 }
 
+                // 初始化群組清單(下拉選單 + 輸入框datalist)
                 function initSearchGroupSelector() {
                     $.ajax({
                         url: "/gitlabhelper/groupNames",
@@ -204,8 +208,8 @@
                         },
                         success: function (data) {
                             console.log(data); // debug
-                            drawSearchGroupSelector(data);
-                            drawSearchGroupList(data);
+                            drawSearchGroupSelector(data); // 顯示群組下拉選單
+                            drawSearchGroupList(data); // 顯示輸入框datalist
                             countProjects();
                         },
                         error: function (xhr, status, error) {
@@ -221,6 +225,7 @@
                     });
                 }
 
+                // 關鍵字查詢
                 function doQueryByKeyWord() {
                     if (!$("#keyword").val() || $("#keyword").val().length < 2) {
                         Swal.fire({
@@ -267,12 +272,14 @@
 
                 }
 
+                // 群組下拉選單變動時，同步更新輸入框 + 專案數
                 function doChangeGroupSelected() {
                 	let selectedOption = $("#searchGroupSelector").val();
                 	$("#searchGroup").val(selectedOption);
                 	countProjects();
                 }
                 
+             	// 顯示群組下拉選單
                 function drawSearchGroupSelector(data) {
                     $("#searchGroupSelector").empty();
                     $("#searchGroupSelector").append(
@@ -283,6 +290,7 @@
                     })
                 }
 
+             	// 顯示輸入框datalist
                 function drawSearchGroupList(data) {
                 	$("#groups").empty();
                     $("#groups").append(
@@ -292,12 +300,14 @@
                             `<option value="\${groupData.group_name}" project_num="\${groupData.number}">\${groupData.group_name}\t專案筆數: \${groupData.number}</option>`)
                     })
                 }
-                
+             	// 顯示所有專案查詢結果
                 function drawResultList(data) {
                     $("#resultList").empty();
                     
                     data.forEach((searchResult) => {
                         let infoMessage = '';
+                        
+                        // 超過結果上限，顯示警告
                         if (searchResult.is_over_limit) {
                             infoMessage = '<b style="color:red;">※ 超過搜尋上限，僅顯示部分資料</b><br>';
                         }
@@ -315,13 +325,7 @@
                     })
                 }
 
-                /**
-                 * 將token存入localStorage
-                 */
-                function doCacheToken() {
-                    localStorage.setItem("token", $("#token").val());
-                }
-
+				// 顯示關鍵字查詢結果
                 function drawProjectList(data) {
                     $("#projectList").empty();
                     data.forEach(function (project) {
@@ -334,6 +338,12 @@
                     })
                 }
 
+				// 將token存入localStorage
+                function doCacheToken() {
+                    localStorage.setItem("token", $("#token").val());
+                }
+				
+            	// 標記欄位符合搜尋部分
                 function highlightSearchText() {
                     const keyword = $('#keyword').val();
                     const regex = new RegExp(keyword , 'ig')
@@ -372,6 +382,7 @@
                 	});
                 }
                 
+                // 顯示專案數
                 function countProjects() {
                 	const findGroupString = $('#searchGroup').val();
                 	
