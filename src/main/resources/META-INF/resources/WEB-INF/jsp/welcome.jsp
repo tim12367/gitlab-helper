@@ -251,6 +251,7 @@
                             $("#keywordResultTable").show();
                             hljs.highlightAll(); // 觸發highlight.js 修改CODE顏色
                             highlightSearchText();
+                            markSearchTextCode();
                         },
                         error: function (xhr, status, error) {
                             var err = eval("(" + xhr.responseText + ")");
@@ -336,7 +337,7 @@
                 function highlightSearchText() {
                     const keyword = $('#keyword').val();
                     const regex = new RegExp(keyword , 'ig')
-                    const replaceString = `<mark style="background-color: rebeccapurple;">\${keyword}</mark>`;
+                    const replaceString = `<p style="background-color: rebeccapurple;">\${keyword}</p>`;
                     $(`.search-result`).each((index, element) => {
                     	const originalHTML = $(element).html();
                     	
@@ -348,6 +349,27 @@
                     	replaceResult = replaceResult.replace(regex,replaceString);
                     	$(element).html(replaceResult);
 					});
+                }
+                
+                // 標記CODE符合搜尋部分
+                function markSearchTextCode() {
+                	const keyword = $('#keyword').val();
+                    const regex = new RegExp(keyword , 'gi')
+                    
+                	$('.hljs').filter(function() {
+                		// The lastIndex property specifies the index at which to start the next match.
+                		regex.lastIndex = 0; // 使用g(全域)時 lastIndex會向後推，造成有時true有時false的現象
+                	    return regex.test($(this).html());
+                	}).each((index, element) => {
+                		const originalHTML = $(element).html();
+                		
+                		// 使用replace，在不改變原始字串大小寫情況下加入標記
+                		let replaceResult = originalHTML.replace(regex,function (str) { 
+                			return'<span class="hljs-deletion">'+str+'</span>'
+                		});
+                		
+                		$(element).html(replaceResult);
+                	});
                 }
                 
                 function countProjects() {
